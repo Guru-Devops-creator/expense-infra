@@ -12,24 +12,17 @@ pipeline {
 
     }
     stages {
-        stage('Init') {
+        stage('Init and plan') {
             steps {
+                withAWS (region: 'us-east-1', credentials: 'aws-creds')
                 sh """
                     cd 10-vpc
                     terraform init --reconfigure
+                    terraform plan -out=tfplan
                 """
             }
         }
-        stage('Plan') {
-            steps {
-                withAWS (region: 'us-east-1', credentials: 'aws-creds') {
-                    sh 'cd 10-vpc'
-                    sh 'terraform plan -out=tfplan'
-
-                }
-                
-            }
-        }
+       
     //     stage('Deploy') {
     //         steps {
     //             sh "echo This is deploy"
@@ -66,7 +59,7 @@ pipeline {
     post {
         always {
             echo "This section runs always"
-            //deleteDir()
+            deleteDir()
         }
         success {
             echo " This section runs only when pipeline success"
